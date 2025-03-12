@@ -1,0 +1,49 @@
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Environnements virtuels
+venv/
+.env/
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Modèles et datasets lourds
+dataset.zip
+signature.txt
+
+# Graphiques et visualisations
+*.png
+*.jpg
+
+# Docker volumes éventuels
+docker-volumes/
+
+# Sauvegardes de fichiers
+*.old
+*.backup
+
+# Fichiers spécifiques à l'IDE
+.vscode/
+.idea/
+
+# Fichiers de tests générés
+Unit_test1/predictions.txt
+Unit_test2/predictions.txt
+
+# Dossiers sources des datasets ignorés
+images/
+Unit_test1/
+Unit_test2/

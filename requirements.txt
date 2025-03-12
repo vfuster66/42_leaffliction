@@ -1,0 +1,11 @@
+numpy
+pandas
+matplotlib
+seaborn
+opencv-python
+scikit-learn
+albumentations
+colorama
+tensorflow==2.12.0
+tf2onnx
+tqdm

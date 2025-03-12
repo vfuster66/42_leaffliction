@@ -1,0 +1,40 @@
+# Ignore files not needed in the Docker context
+
+# Git
+.git
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.vscode
+.idea
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environnements locaux
+env/
+venv/
+.env
+
+# Fichiers d'archives temporaires
+*.zip
+*.tar
+*.tar.gz
+
+# Datasets lourds
+dataset.zip
+
+# Tests et rapports
+tests/
+Unit_test1/
+Unit_test2/
+
+# Autres non nécessaires dans le conteneur
+signature.txt
