@@ -9,6 +9,7 @@ DOCKER_RUN = @docker run --rm -t \
 	-v $(PROJECT_DIR):$(WORKDIR) \
 	-v $(IMAGES_DIR):/app/images \
 	-v $(OUTPUT_DIR):/app/output \
+	-e PYTHONPATH=/app \
 	$(IMAGE_NAME)
 
 # DOCKER ENVIRONNEMENT
@@ -92,6 +93,31 @@ clean:
 		   train_dataset/ \
 		   output/
 
+# TESTS UNITAIRES
+test:
+	@echo "🧪 Lancement de tous les tests avec pytest..."
+	$(DOCKER_RUN) pytest tests/ --disable-warnings -v
+
+test-distribution:
+	@echo "🧪 Test unitaire de Distribution.py..."
+	$(DOCKER_RUN) pytest tests/test_distribution.py --disable-warnings -v
+
+test-augmentation:
+	@echo "🧪 Test unitaire de Augmentation.py..."
+	$(DOCKER_RUN) pytest tests/test_augmentation.py --disable-warnings -v
+
+test-transformation:
+	@echo "🧪 Test unitaire de Transformation.py..."
+	$(DOCKER_RUN) pytest tests/test_transformation.py --disable-warnings -v
+
+test-train:
+	@echo "🧪 Test unitaire de train.py..."
+	$(DOCKER_RUN) pytest tests/test_train.py --disable-warnings -v
+
+test-predict:
+	@echo "🧪 Test unitaire de predict.py..."
+	$(DOCKER_RUN) pytest tests/test_predict.py --disable-warnings -v
+
 super-clean:
 	@echo "🔥 Super Clean : Suppression des fichiers et des images Docker..."
 
@@ -125,3 +151,7 @@ pipeline: clean build run-distribution run-augmentation balance-augmented run-tr
 zip-dataset:
 	@echo "📦 Création de dataset_leafflection.zip avec images/ Unit_test1/ Unit_test2/..."
 	zip -r dataset_leafflection.zip images Unit_test1 Unit_test2
+
+test-flake8:
+	@echo "🧹 Lancement de flake8 sur tout le projet..."
+	$(DOCKER_RUN) flake8 . --config=.flake8

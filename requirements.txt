@@ -9,3 +9,5 @@ colorama
 tensorflow==2.12.0
 tf2onnx
 tqdm
+pytest
+flake8
