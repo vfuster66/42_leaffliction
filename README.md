@@ -55,6 +55,38 @@ Ce projet vise à :
 
 ---
 
+## 🛠️ Technologies et Dépendances
+
+Le projet **Leaffliction** repose sur des technologies open-source robustes, adaptées à la **classification d'images** et au **traitement d'images en machine learning**.
+
+### 🐳 Docker
+- **Pourquoi ?** ➔ Assurer un environnement isolé, reproductible et indépendant du système de l'utilisateur.
+- Le Dockerfile configure un conteneur Python 3.10 avec TensorFlow, OpenCV, etc.
+
+### 🐍 Python 3.10
+- Langage principal du projet.
+- Simplicité, lisibilité et puissance pour le traitement d'images et le deep learning.
+
+---
+
+## 📦 Librairies Python utilisées (requirements.txt)
+
+| 📚 Librairie        | 🎯 Usage |
+|---------------------|--------------------------------|
+| **numpy**           | Manipulation efficace de tableaux de données numériques (traitement d’images). |
+| **pandas** (optionnel) | Gestion structurée des données tabulaires, si besoin pour des analyses complémentaires. |
+| **matplotlib**      | Visualisation : courbes d'apprentissage, histogrammes, matrices de confusion. |
+| **seaborn** (optionnel) | Visualisation avancée, matrices de confusion plus lisibles si activé. |
+| **opencv-python**   | Traitement d’images : lecture, transformations (crop, blur, edge detection, etc.). |
+| **tensorflow / keras** | Création et entraînement du modèle CNN, prédictions sur nouvelles images. |
+| **scikit-learn**    | Outils d'évaluation : matrice de confusion, calcul de précision, etc. |
+| **albumentations**  | Data Augmentation avancée (non activée mais prête à l’emploi si besoin). |
+| **colorama**        | Affichage coloré dans le terminal pour une meilleure lisibilité des logs. |
+| **pytest**          | Exécution des tests unitaires. |
+| **flake8**          | Analyse statique du code pour vérifier la conformité à la norme PEP8. |
+
+---
+
 ## 🏁 Pipeline complet du projet
 
 ### 1️⃣ Analyse du dataset : **Comprendre les données**
@@ -92,7 +124,7 @@ La Data Augmentation permet de générer des variations artificielles à partir 
 - **Description** : applique un flou gaussien pour réduire les détails fins et lisser les variations de l’image.
 - **Pourquoi ?** : améliore la robustesse du modèle sur des images floues ou de qualité réduite.
 
-**Commandes :**
+#### ➤ Commande :
 ```
 make run-augmentation
 make balance-augmented
@@ -128,12 +160,29 @@ Ces transformations sont principalement destinées à la **visualisation analyti
 - **Description** : transforme l’image en noir et blanc selon un seuil d’intensité (binarisation).
 - **But** : isole la forme de la feuille ou met en évidence les lésions.
 
+#### ➤ Commande :
 ```
 make run-transformation-balanced
 ```
 - Gaussian Blur, Edge Detection, ROI, Color Histogram, etc.
 
 ### 4️⃣ Entraînement du modèle CNN : **Créer l'intelligence**
+
+#### ➤ Qu'est-ce qu'un CNN ?
+Un **Convolutional Neural Network (CNN)** est un type de réseau de neurones adapté à l'analyse d'images.  
+Il permet de **détecter automatiquement des caractéristiques visuelles** (bords, motifs, textures).
+
+#### ➤ Fonctionnement général :
+1. **Convolution** : filtre l’image pour extraire des **motifs visuels locaux**.  
+2. **Pooling** : réduit la taille des données tout en gardant les **informations essentielles**.  
+3. **Flatten et Dense** : transforme ces données en **vecteurs** exploitables pour la classification.  
+4. **Softmax** : fournit la probabilité pour chaque classe de maladie.
+
+#### ➤ Entraînement :
+- Les images passent dans le CNN ➜ il prédit la classe ➜ compare avec la vérité terrain ➜ ajuste ses paramètres (poids).  
+- Ce processus se répète sur **plusieurs époques** (cycles) pour **minimiser l'erreur** et **améliorer la précision**.
+
+#### ➤ Commande :
 ```
 make train
 ```
@@ -141,12 +190,112 @@ make train
 - Résultat : modèle H5, dataset.zip + signature.txt, courbes PNG.
 
 ### 5️⃣ Prédictions sur nouvelles images : **Tester le modèle**
+
+### ➤ Qu'est-ce qu'une prédiction ?
+
+Une **prédiction** est le résultat du **modèle CNN** lorsqu’on lui fournit une nouvelle **image inconnue**.  
+Le modèle retourne une **probabilité** pour chaque classe possible (exemple : Apple_healthy, Grape_Esca, etc.).
+
+- La **classe ayant la probabilité la plus élevée** est considérée comme la **classe prédite**.  
+- La prédiction fournit aussi une **deuxième meilleure hypothèse** (Top 2), ce qui peut être utile pour le **diagnostic**.
+
+---
+
+### ➤ Fonctionnement du processus de prédiction
+
+1. **Chargement et préparation de l'image**  
+   - Conversion en RGB.  
+   - Redimensionnement à 224x224 pixels.  
+   - Normalisation des pixels (valeurs entre 0 et 1).
+
+2. **Passage dans le modèle CNN**  
+   - Le modèle génère un **vecteur de probabilités**, chaque valeur représentant la probabilité que l'image appartienne à une classe.
+
+3. **Identification de la classe prédite (Top 1)**  
+   - La classe ayant la **probabilité maximale** est retournée comme prédiction principale.  
+   - Exemple : 98% de probabilité pour "Apple_healthy".
+
+4. **Affichage de la seconde meilleure prédiction (Top 2)**  
+   - Affiche la **deuxième classe probable**, ce qui peut aider à comprendre les erreurs du modèle.
+
+---
+
+### ➤ Exemple de sortie dans le terminal
+
+```
+Apple_healthy_1.JPG ➜ ✅ Apple_healthy (98.45%) (2nd: Apple_rust: 1.23%)
+```
+
+- ✅ indique que la **classe prédite correspond à la vraie classe** (validation correcte).  
+- Le **Top 2** donne une indication de la seconde meilleure estimation (utile si les classes sont proches).
+
+---
+
+### ➤ Pourquoi utiliser une matrice de confusion ?
+
+Une **matrice de confusion** permet de **visualiser la performance globale** du modèle sur un ensemble d'images de test.
+
+#### But :
+- Comparer les **classes réelles** et les **classes prédites**.  
+- Identifier les **erreurs fréquentes** (exemple : Grape_Black_rot confondu avec Grape_spot).  
+- Évaluer si certaines classes sont **sur-prédictées** ou **ignorées**.
+
+#### Lecture de la matrice :
+- **Diagonale principale** ➜ prédictions correctes.  
+- **Hors diagonale** ➜ erreurs de classification.  
+- Une bonne matrice de confusion est **proche d'une diagonale pure**.
+
+---
+
+### ➤ Commandes pour lancer les prédictions sur dossiers
+
 ```
 make predict-folder-unit1
 make predict-folder-unit2
 ```
-- Top 2 classes + probabilités.
-- Matrice de confusion + logs d'erreurs.
+
+- Prédit toutes les images contenues dans le dossier `Unit_test1` ou `Unit_test2`.  
+- Génère des **fichiers de résultats** et des **rapports visuels**.
+
+---
+
+### ➤ Fichiers générés dans le dossier output/predictions
+
+- `predictions_<dossier>.txt` ➜ Liste de toutes les prédictions, avec scores de confiance.  
+- `errors_<dossier>.txt` ➜ Liste des erreurs de prédiction, pour chaque image :  
+  - Classe réelle.  
+  - Classe prédite.  
+- `confusion_matrix_<dossier>.png` ➜ Matrice de confusion, visuelle et sauvegardée au format image.
+
+---
+
+### ➤ Comment interpréter les résultats
+
+- Une **précision globale élevée** (>90%) signifie un modèle performant.  
+- La **matrice de confusion** doit être **bien diagonale**, montrant peu ou pas d'erreurs.  
+- Le **fichier errors.txt** permet d'analyser précisément quelles images sont **mal classées**, et **pourquoi**.
+
+---
+
+## 🔬 Pourquoi ces analyses sont importantes ?
+
+- Cela permet de **valider** le modèle avant déploiement.  
+- Identifier les **faiblesses spécifiques** (exemple : difficulté à distinguer deux maladies proches).  
+- Permet de **réentraîner** le modèle ou d'ajuster l'augmentation si certaines classes sont difficiles à classifier.
+
+---
+
+## 📂 Exemple simplifié d'une matrice de confusion
+
+|                   | Pred: Healthy | Pred: Scab | Pred: Rust |
+|-------------------|:-------------:|:----------:|:---------:|
+| **True: Healthy** | 50            |  2         | 1         |
+| **True: Scab**    | 3             | 45         | 5         |
+| **True: Rust**    | 2             | 4          | 46        |
+
+Ici :  
+- Les prédictions sont **majoritairement correctes** sur la diagonale.  
+- Quelques erreurs entre Scab et Rust ➔ **peut suggérer une similitude visuelle** dans les symptômes.
 
 ---
 
@@ -168,18 +317,6 @@ make test-flake8
 
 - Tests unitaires : pytest.
 - Norme : flake8 sur tout le projet.
-
----
-
-## 📖 Explication du modèle CNN
-
-- 3 Conv2D + MaxPooling.
-- Flatten + Dense (256) + Dropout (0.5).
-- Sortie Softmax (classification).
-
-**Pourquoi ?**
-- Léger, rapide (Mac M1).
-- Suffisant pour un dataset modeste.
 
 ---
 
